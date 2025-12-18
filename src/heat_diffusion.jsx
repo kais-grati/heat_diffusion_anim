@@ -453,162 +453,170 @@ const HeatDiffusionVisualization = () => {
   };
 
   return (
-    <div className="w-full h-screen bg-gray-900 p-6 flex flex-col">
+    <div className="w-full h-screen bg-gray-900 p-3 sm:p-4 flex flex-col overflow-hidden">
       {/* Title */}
-      <div className="text-white mb-4">
-        <h1 className="text-3xl font-bold mb-2">Heat Diffusion Visualization by Kais Grati & Yassine Laourine</h1>
+      <div className="text-white mb-3 flex-shrink-0">
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold leading-tight">
+          Heat Diffusion Visualization by Kais Grati & Yassine Laourine
+        </h1>
       </div>
       
-      {/* Canvas for plotting the solution */}
-      <canvas 
-        ref={canvasRef} 
-        width={1000} 
-        height={500}
-        className="bg-gray-800 rounded-lg shadow-lg mb-4"
-      />
-      
-      {/* Legend explaining the visualization */}
-      <div className="bg-gray-800 rounded-lg p-4 mb-4">
-        <div className="text-gray-400 text-sm space-y-1">
-          <p><span className="text-gray-300">Dashed gray line:</span> Initial condition f(x)</p>
-          {barType === 'infinite' && time > 0 && (
-            <p><span className="text-purple-400">Dashed purple line:</span> Gaussian kernel G(x-ξ,t) centered at x=5</p>
-          )}
-          <p><span className="text-gray-300">Solid colored line:</span> Current temperature distribution u(x,t)</p>
-          <p className="mt-2">
-            {barType === 'infinite' 
-              ? 'Infinite bar: Solution = f(x) ⊗ G(x,t) (convolution with Gaussian kernel). The purple curve shows the spreading Gaussian.'
-              : boundaryCondition === 'dirichlet'
-                ? 'Dirichlet BC: Both ends fixed at zero temperature (heat sinks). Heat escapes at boundaries.'
-                : boundaryCondition === 'neumann'
-                  ? 'Neumann BC: Both ends insulated (no heat flow through boundaries). Total heat is conserved!'
-                  : 'Mixed BC: Left end at zero, right end insulated. Asymmetric behavior.'
-            }
-          </p>
-        </div>
-      </div>
-      
-      {/* Controls panel */}
-      <div className="bg-gray-800 rounded-lg p-6 space-y-4">
-        {/* Play/Pause and Reset buttons */}
-        {/* Play/Pause and Reset buttons */}
-        <div className="flex gap-4 items-center">
-          {/* Play/Pause toggle button */}
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
-          >
-            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-            {isPlaying ? 'Pause' : 'Play'}
-          </button>
+      {/* Main content area - side by side on larger screens */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-3 min-h-0">
+        {/* Left side: Canvas and Legend */}
+        <div className="flex-1 flex flex-col min-h-0 lg:min-w-0">
+          {/* Canvas for plotting the solution - responsive container */}
+          <div className="flex-1 bg-gray-800 rounded-lg shadow-lg overflow-hidden flex items-center justify-center min-h-0">
+            <canvas 
+              ref={canvasRef} 
+              width={1000} 
+              height={500}
+              className="max-w-full max-h-full"
+              style={{ display: 'block', width: 'auto', height: 'auto' }}
+            />
+          </div>
           
-          {/* Reset button - returns to initial condition */}
-          <button
-            onClick={handleReset}
-            className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
-          >
-            <RotateCcw size={20} />
-            Reset
-          </button>
+          {/* Legend explaining the visualization */}
+          <div className="bg-gray-800 rounded-lg p-2 sm:p-3 mt-3 flex-shrink-0">
+            <div className="text-gray-400 text-xs space-y-1">
+              <p><span className="text-gray-300">Dashed gray:</span> Initial f(x)</p>
+              {barType === 'infinite' && time > 0 && (
+                <p><span className="text-purple-400">Dashed purple:</span> Kernel G(x-ξ,t) at x=5</p>
+              )}
+              <p><span className="text-gray-300">Solid line:</span> Current u(x,t)</p>
+              <p className="mt-1 text-[10px] sm:text-xs">
+                {barType === 'infinite' 
+                  ? 'Infinite: f(x) ⊗ G(x,t) convolution'
+                  : boundaryCondition === 'dirichlet'
+                    ? 'Dirichlet: ends at zero (heat escapes)'
+                    : boundaryCondition === 'neumann'
+                      ? 'Neumann: insulated ends (heat conserved)'
+                      : 'Mixed: left=0, right insulated'
+                }
+              </p>
+            </div>
+          </div>
         </div>
         
-        {/* Parameter controls grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Bar type selector: infinite vs finite */}
-          <div>
-            <label className="text-white block mb-2">Bar Type:</label>
-            <select
-              value={barType}
-              onChange={(e) => {
-                setBarType(e.target.value);
-                setTime(0); // Reset time when changing bar type
-              }}
-              className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+        {/* Right side: Controls panel */}
+        <div className="lg:w-80 xl:w-96 flex flex-col gap-3 min-h-0">
+          {/* Play/Pause and Reset buttons */}
+          <div className="bg-gray-800 rounded-lg p-3 flex gap-2 flex-shrink-0">
+            <button
+              onClick={() => setIsPlaying(!isPlaying)}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition text-sm"
             >
-              <option value="infinite">Infinite Bar (Convolution)</option>
-              <option value="finite">Finite Bar (Fourier Series)</option>
-            </select>
+              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+              {isPlaying ? 'Pause' : 'Play'}
+            </button>
+            
+            <button
+              onClick={handleReset}
+              className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition text-sm"
+            >
+              <RotateCcw size={16} />
+              Reset
+            </button>
           </div>
           
-          {/* Boundary condition selector (only for finite bar) */}
-          {barType === 'finite' && (
+          {/* Parameter controls - scrollable on small screens */}
+          <div className="flex-1 bg-gray-800 rounded-lg p-3 space-y-3 overflow-y-auto min-h-0">
+            {/* Bar type selector */}
             <div>
-              <label className="text-white block mb-2">Boundary Conditions:</label>
+              <label className="text-white block mb-1.5 text-sm">Bar Type:</label>
               <select
-                value={boundaryCondition}
+                value={barType}
                 onChange={(e) => {
-                  setBoundaryCondition(e.target.value);
-                  setTime(0); // Reset time when changing BC
+                  setBarType(e.target.value);
+                  setTime(0);
                 }}
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+                className="w-full bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm"
               >
-                <option value="dirichlet">Dirichlet: u(0)=u(L)=0</option>
-                <option value="neumann">Neumann: ∂u/∂x(0)=∂u/∂x(L)=0</option>
-                <option value="mixed">Mixed: u(0)=0, ∂u/∂x(L)=0</option>
+                <option value="infinite">Infinite Bar</option>
+                <option value="finite">Finite Bar</option>
               </select>
             </div>
-          )}
-          
-          {/* Initial condition selector */}
-          <div>
-            <label className="text-white block mb-2">Initial Condition:</label>
-            <select
-              value={initialCondition}
-              onChange={(e) => {
-                setInitialCondition(e.target.value);
-                setTime(0); // Reset time when changing initial condition
-              }}
-              className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
-            >
-              <option value="gaussian">Gaussian Peak</option>
-              <option value="step">Step Function (pulse)</option>
-              <option value="step-discontinuous">Step 0→1 (discontinuous)</option>
-              <option value="triangle">Triangle</option>
-              <option value="two-peaks">Two Peaks</option>
-              <option value="sigmoid">Sigmoid</option>
-              <option value="chaotic">Chaotic (Multi-frequency)</option>
-            </select>
-          </div>
+            
+            {/* Boundary condition selector */}
+            {barType === 'finite' && (
+              <div>
+                <label className="text-white block mb-1.5 text-sm">Boundary:</label>
+                <select
+                  value={boundaryCondition}
+                  onChange={(e) => {
+                    setBoundaryCondition(e.target.value);
+                    setTime(0);
+                  }}
+                  className="w-full bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm"
+                >
+                  <option value="dirichlet">Dirichlet</option>
+                  <option value="neumann">Neumann</option>
+                  <option value="mixed">Mixed</option>
+                </select>
+              </div>
+            )}
+            
+            {/* Initial condition selector */}
+            <div>
+              <label className="text-white block mb-1.5 text-sm">Initial Condition:</label>
+              <select
+                value={initialCondition}
+                onChange={(e) => {
+                  setInitialCondition(e.target.value);
+                  setTime(0);
+                }}
+                className="w-full bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm"
+              >
+                <option value="gaussian">Gaussian Peak</option>
+                <option value="step">Step (pulse)</option>
+                <option value="step-discontinuous">Step 0→1</option>
+                <option value="triangle">Triangle</option>
+                <option value="two-peaks">Two Peaks</option>
+                <option value="sigmoid">Sigmoid</option>
+                <option value="chaotic">Chaotic</option>
+              </select>
+            </div>
 
-          {/* Diffusivity slider - controls how fast heat spreads */}
-          <div>
-            <label className="text-white block mb-2">
-              Diffusivity (α): {alpha.toFixed(2)}
-            </label>
-            <input
-              type="range"
-              min="0.01"
-              max="0.5"
-              step="0.01"
-              value={alpha}
-              onChange={(e) => {
-                setAlpha(parseFloat(e.target.value));
-                setTime(0); // Reset time when changing diffusivity
-              }}
-              className="w-full"
-            />
-          </div>
+            {/* Diffusivity slider */}
+            <div>
+              <label className="text-white block mb-1.5 text-sm">
+                Diffusivity (α): {alpha.toFixed(2)}
+              </label>
+              <input
+                type="range"
+                min="0.01"
+                max="0.5"
+                step="0.01"
+                value={alpha}
+                onChange={(e) => {
+                  setAlpha(parseFloat(e.target.value));
+                  setTime(0);
+                }}
+                className="w-full"
+              />
+            </div>
 
-          {/* Bar length input */}
-          <div>
-            <label className="text-white block mb-2">
-              Bar Length (L): {L.toFixed(1)}
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="50"
-              step="0.5"
-              value={L}
-              onChange={(e) => {
-                const newL = parseFloat(e.target.value);
-                if (!isNaN(newL) && newL > 0) {
-                  setL(newL);
-                  setTime(0); // Reset time when changing bar length
-                }
-              }}
-              className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
-            />
+            {/* Bar length input */}
+            <div>
+              <label className="text-white block mb-1.5 text-sm">
+                Bar Length (L): {L.toFixed(1)}
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="50"
+                step="0.5"
+                value={L}
+                onChange={(e) => {
+                  const newL = parseFloat(e.target.value);
+                  if (!isNaN(newL) && newL > 0) {
+                    setL(newL);
+                    setTime(0);
+                  }
+                }}
+                className="w-full bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm"
+              />
+            </div>
           </div>
         </div>
       </div>
